@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Track Your Order — Shop360</title>
+<meta name="description" content="Track your Shop360 order status by Order ID.">
+<link rel="icon" type="image/svg+xml" href="assets/favicon.svg">
+<link rel="icon" type="image/png" sizes="32x32" href="assets/favicon-32.png">
+<link rel="apple-touch-icon" href="assets/apple-touch-icon.png">
+<link rel="stylesheet" href="css/style.css">
+<style>
+  .track-steps{ display:flex; justify-content:space-between; margin: 34px 0 6px; position:relative; }
+  .track-steps::before{
+    content:''; position:absolute; top:19px; left:19px; right:19px; height:2px; background: var(--border); z-index:0;
+  }
+  .track-steps .fill{
+    content:''; position:absolute; top:19px; left:19px; height:2px; background: var(--accent); z-index:1;
+    transition: width .3s ease;
+  }
+  .track-step{ position:relative; z-index:2; display:flex; flex-direction:column; align-items:center; gap:8px; flex:1; }
+  .track-step .dot{
+    width:40px; height:40px; border-radius:50%; background: var(--paper); border:2px solid var(--border);
+    display:flex; align-items:center; justify-content:center; color: var(--ink-faint);
+  }
+  .track-step.done .dot{ background: var(--accent); border-color: var(--accent); color:#fff; }
+  .track-step.current .dot{ border-color: var(--accent); color: var(--accent); }
+  .track-step span.label{ font-size:.8rem; font-weight:600; color: var(--ink-soft); text-align:center; }
+  .track-step.done span.label, .track-step.current span.label{ color: var(--charcoal-900); }
+  .track-cancelled{
+    background: var(--danger-light); color: var(--danger); border-radius: var(--radius); padding:16px 20px;
+    font-weight:600; display:flex; align-items:center; gap:10px; margin-top:20px;
+  }
+  .order-detail-row{ display:flex; justify-content:space-between; padding:10px 0; border-bottom:1px solid var(--border); font-size:.92rem; }
+  .order-detail-row:last-child{ border-bottom:none; }
+  .order-detail-row .label{ color: var(--ink-soft); }
+</style>
+</head>
+<body>
+
+<header class="site-header">
+  <div class="container nav-row">
+    <a href="index.html" class="brand"><span class="mark"><img src="assets/logo-mark.svg" alt="Shop360 logo"></span> <span class="store-name">Shop360</span></a>
+    <nav class="main-nav">
+      <ul>
+        <li><a href="index.html">Home</a></li>
+        <li><a href="shop.html">Shop</a></li>
+        <li><a href="track-order.html" class="active">Track Order</a></li>
+        <li><a href="about.html">About</a></li>
+        <li><a href="contact.html">Contact</a></li>
+      </ul>
+    </nav>
+    <div class="nav-actions">
+      <a href="profile.html" class="account-link" style="font-weight:600; display:flex; align-items:center; gap:6px;"><span data-icon="user" class="icon-sm"></span> <span class="account-link-label">Account</span></a>
+      <a href="cart.html" class="cart-pill"><span data-icon="cart" class="icon-sm"></span> Cart <span class="count cart-count">0</span></a>
+      <button class="menu-toggle" aria-label="Menu"><span data-icon="menu" class="icon-lg"></span></button>
+    </div>
+  </div>
+</header>
+<div class="brand-strip"></div>
+
+<section>
+  <div class="container" style="max-width:640px;">
+    <div class="breadcrumb"><a href="index.html">Home</a> / Track Order</div>
+    <h1>Track your order</h1>
+    <p style="color:var(--ink-soft);">Enter the Order ID from your confirmation page or WhatsApp message.</p>
+
+    <div class="form-card">
+      <form id="track-form">
+        <div class="field">
+          <label>Order ID *</label>
+          <input type="text" id="t-orderid" placeholder="e.g. ORD-260814-1234" required>
+        </div>
+        <div class="field">
+          <label>Phone Number (optional, for verification)</label>
+          <input type="tel" id="t-phone" placeholder="03XXXXXXXXX">
+          <div class="hint">Adding your phone helps us confirm the order belongs to you.</div>
+        </div>
+        <button type="submit" class="btn btn-primary btn-block" id="track-submit">
+          <span data-icon="search" class="icon-sm"></span> Track Order
+        </button>
+      </form>
+    </div>
+
+    <div id="track-result"></div>
+
+    <div style="text-align:center; margin-top:24px; color:var(--ink-soft); font-size:.9rem;">
+      Can't find your order? <a href="contact.html" style="color:var(--accent); font-weight:600;">Contact us</a>
+      or message us on <a href="#" id="wa-help" style="color:var(--accent); font-weight:600;">WhatsApp</a>.
+    </div>
+  </div>
+</section>
+
+<footer class="site-footer">
+  <div class="container footer-bottom">
+    <span>© <span class="year"></span> <span class="store-name">Shop360</span>. All rights reserved.</span>
+  </div>
+</footer>
+
+<script src="js/icons.js"></script>
+<script src="js/api.js"></script>
+<script src="js/cart.js"></script>
+<script src="js/auth.js"></script>
+<script src="js/main.js"></script>
+<script>
+document.getElementById("wa-help").href = `https://wa.me/${CONFIG.WHATSAPP_NUMBER}?text=${encodeURIComponent("Hi, I need help tracking my order.")}`;
+
+const STEPS = ["Pending","Confirmed","Shipped","Delivered"];
+
+function renderSteps(status){
+  if(status === "Cancelled"){
+    return `<div class="track-cancelled">${iconSvg("xCircle","icon-md")} This order was cancelled.</div>`;
+  }
+  const idx = Math.max(0, STEPS.indexOf(status));
+  const fillPct = idx === 0 ? 0 : (idx / (STEPS.length - 1)) * 100;
+  return `
+  <div class="track-steps">
+    <div class="fill" style="width:${fillPct}%"></div>
+    ${STEPS.map((s,i)=>`
+      <div class="track-step ${i < idx ? 'done' : i === idx ? 'current' : ''}">
+        <div class="dot">${i < idx ? iconSvg('check','icon-sm') : (i+1)}</div>
+        <span class="label">${s}</span>
+      </div>`).join("")}
+  </div>`;
+}
+
+document.getElementById("track-form").addEventListener("submit", async (e) => {
+  e.preventDefault();
+  const orderId = document.getElementById("t-orderid").value.trim();
+  const phone = document.getElementById("t-phone").value.trim();
+  const btn = document.getElementById("track-submit");
+  const resultBox = document.getElementById("track-result");
+
+  btn.disabled = true;
+  const original = btn.innerHTML;
+  btn.innerHTML = "Searching...";
+  resultBox.innerHTML = "";
+
+  const result = await trackOrder(orderId, phone);
+
+  btn.disabled = false;
+  btn.innerHTML = original;
+
+  if(!result || !result.found){
+    resultBox.innerHTML = `
+    <div class="form-card" style="margin-top:20px; text-align:center;">
+      <span class="icon-wrap" style="margin:0 auto 12px; width:56px; height:56px; border-radius:14px; background:var(--danger-light); color:var(--danger); display:flex; align-items:center; justify-content:center;">${iconSvg('alertTriangle','icon-lg')}</span>
+      <h3>Order not found</h3>
+      <p style="color:var(--ink-soft);">${(result && result.error) || "Please double-check your Order ID and try again."}</p>
+    </div>`;
+    return;
+  }
+
+  const statusClass = result.status === "Confirmed" ? "status-confirmed" : "status-pending";
+
+  resultBox.innerHTML = `
+  <div class="form-card" style="margin-top:20px;">
+    <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px;">
+      <div>
+        <div style="font-size:.8rem; color:var(--ink-faint); text-transform:uppercase; letter-spacing:.05em; font-weight:700;">Order</div>
+        <div style="font-family:var(--font-display); font-weight:700; font-size:1.2rem;">${result.orderId}</div>
+      </div>
+      <span class="status-tag ${statusClass}">${result.status}</span>
+    </div>
+
+    ${renderSteps(result.status)}
+
+    <div style="margin-top:24px;">
+      <div class="order-detail-row"><span class="label">Name</span><span>${result.name || "—"}</span></div>
+      <div class="order-detail-row"><span class="label">City</span><span>${result.city || "—"}</span></div>
+      <div class="order-detail-row"><span class="label">Items</span><span style="text-align:right; max-width:60%;">${result.items || "—"}</span></div>
+      <div class="order-detail-row"><span class="label">Payment</span><span>${result.paymentMethod || "—"}</span></div>
+      <div class="order-detail-row"><span class="label">Total</span><span style="font-weight:700;">${result.total ? fmtPrice(result.total) : "—"}</span></div>
+    </div>
+    ${result.demo ? `<p style="margin-top:14px; font-size:.8rem; color:var(--ink-faint);">Demo mode — connect your Google Sheet in js/api.js to track real orders.</p>` : ""}
+  </div>`;
+});
+</script>
+</body>
+</html>

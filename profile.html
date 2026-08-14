@@ -1,0 +1,388 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>My Account — Shop360</title>
+<link rel="icon" type="image/svg+xml" href="assets/favicon.svg">
+<link rel="icon" type="image/png" sizes="32x32" href="assets/favicon-32.png">
+<link rel="apple-touch-icon" href="assets/apple-touch-icon.png">
+<link rel="stylesheet" href="css/style.css">
+<style>
+  .auth-tabs{ display:flex; gap:6px; background:var(--paper-dim); padding:4px; border-radius:999px; margin-bottom:22px; max-width:320px; }
+  .auth-tabs button{ flex:1; border:none; background:transparent; padding:10px; border-radius:999px; font-weight:700; font-size:.9rem; color:var(--ink-soft); }
+  .auth-tabs button.active{ background:var(--charcoal-900); color:#fff; }
+  .auth-panel{ display:none; }
+  .auth-panel.active{ display:block; }
+  .account-header{ display:flex; align-items:center; gap:16px; margin-bottom:24px; flex-wrap:wrap; }
+  .account-avatar{ width:56px; height:56px; border-radius:50%; background:var(--charcoal-900); color:#fff; display:flex; align-items:center; justify-content:center; font-family:var(--font-display); font-weight:700; font-size:1.3rem; }
+  .account-tabs{ display:flex; gap:8px; border-bottom:1px solid var(--border); margin-bottom:24px; flex-wrap:wrap; }
+  .account-tabs button{ background:none; border:none; padding:12px 16px; font-weight:700; color:var(--ink-soft); border-bottom:2px solid transparent; display:flex; align-items:center; gap:7px; }
+  .account-tabs button.active{ color:var(--charcoal-900); border-color:var(--accent); }
+  .account-panel{ display:none; }
+  .account-panel.active{ display:block; }
+  .order-row{ border:1px solid var(--border); border-radius:var(--radius); padding:16px; margin-bottom:12px; }
+  .order-row .top{ display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px; margin-bottom:8px; }
+  .order-row .oid{ font-weight:700; font-family:var(--font-display); }
+  .order-row .meta{ font-size:.85rem; color:var(--ink-soft); }
+  .wishlist-grid{ display:grid; grid-template-columns:repeat(auto-fill,minmax(200px,1fr)); gap:16px; }
+  .wl-remove{ position:absolute; top:10px; right:10px; background:#fff; border-radius:50%; width:32px; height:32px; display:flex; align-items:center; justify-content:center; box-shadow:var(--shadow-sm); color:var(--danger); }
+</style>
+</head>
+<body>
+
+<header class="site-header">
+  <div class="container nav-row">
+    <a href="index.html" class="brand"><span class="mark"><img src="assets/logo-mark.svg" alt="Shop360 logo"></span> <span class="store-name">Shop360</span></a>
+    <nav class="main-nav">
+      <ul>
+        <li><a href="index.html">Home</a></li>
+        <li><a href="shop.html">Shop</a></li>
+        <li><a href="track-order.html">Track Order</a></li>
+        <li><a href="about.html">About</a></li>
+        <li><a href="contact.html">Contact</a></li>
+      </ul>
+    </nav>
+    <div class="nav-actions">
+      <a href="profile.html" class="account-link" style="font-weight:600; display:flex; align-items:center; gap:6px;"><span data-icon="user" class="icon-sm"></span> <span class="account-link-label">Account</span></a>
+      <a href="cart.html" class="cart-pill"><span data-icon="cart" class="icon-sm"></span> Cart <span class="count cart-count">0</span></a>
+      <button class="menu-toggle" aria-label="Menu"><span data-icon="menu" class="icon-lg"></span></button>
+    </div>
+  </div>
+</header>
+<div class="brand-strip"></div>
+
+<section>
+  <div class="container" style="max-width:720px;">
+
+    <!-- LOGGED OUT: login/signup -->
+    <div id="guest-view">
+      <h1>My Account</h1>
+      <p style="color:var(--ink-soft);">Create an account to save your details, track past orders, and check out faster next time.</p>
+
+      <div class="auth-tabs">
+        <button type="button" class="active" data-tab="login">Log In</button>
+        <button type="button" data-tab="signup">Create Account</button>
+      </div>
+
+      <div class="auth-panel active" id="panel-login">
+        <div class="form-card">
+          <form id="login-form">
+            <div class="field"><label>Phone Number</label><input type="tel" id="li-phone" placeholder="03XXXXXXXXX" required></div>
+            <div class="field"><label>Password</label><input type="password" id="li-password" placeholder="••••••" required></div>
+            <p id="login-error" style="color:var(--danger); font-size:.85rem; display:none; margin-bottom:12px;"></p>
+            <button type="submit" class="btn btn-primary btn-block">Log In</button>
+          </form>
+        </div>
+      </div>
+
+      <div class="auth-panel" id="panel-signup">
+        <div class="form-card">
+          <form id="signup-form">
+            <div class="field"><label>Full Name *</label><input type="text" id="su-name" required></div>
+            <div class="field"><label>Phone Number *</label><input type="tel" id="su-phone" placeholder="03XXXXXXXXX" required></div>
+            <div class="field"><label>Password *</label><input type="password" id="su-password" placeholder="At least 6 characters" required minlength="6">
+              <div class="hint">Must be at least 6 characters.</div>
+            </div>
+            <div class="field"><label>Email (optional)</label><input type="email" id="su-email"></div>
+            <p id="signup-error" style="color:var(--danger); font-size:.85rem; display:none; margin-bottom:12px;"></p>
+            <button type="submit" class="btn btn-primary btn-block">Create Account</button>
+          </form>
+        </div>
+      </div>
+    </div>
+
+    <!-- LOGGED IN: profile dashboard -->
+    <div id="member-view" style="display:none;">
+      <div class="account-header">
+        <div class="account-avatar" id="avatar-initial">S</div>
+        <div>
+          <h2 style="margin:0;" id="welcome-name">Welcome back</h2>
+          <p style="color:var(--ink-soft); margin:2px 0 0;" id="welcome-phone"></p>
+        </div>
+        <button class="btn btn-ghost btn-sm" id="logout-btn" style="margin-left:auto;"><span data-icon="logout" class="icon-sm"></span> Log Out</button>
+      </div>
+
+      <div class="account-tabs">
+        <button type="button" class="active" data-panel="profile"><span data-icon="user" class="icon-sm"></span> Profile</button>
+        <button type="button" data-panel="orders"><span data-icon="package" class="icon-sm"></span> My Orders</button>
+        <button type="button" data-panel="wishlist"><span data-icon="heart" class="icon-sm"></span> Wishlist</button>
+        <button type="button" data-panel="security"><span data-icon="lock" class="icon-sm"></span> Security</button>
+      </div>
+
+      <div class="account-panel active" id="tab-profile">
+        <div class="form-card">
+          <form id="profile-form">
+            <div class="row-2">
+              <div class="field"><label>Full Name</label><input type="text" id="pf-name"></div>
+              <div class="field"><label>Phone Number</label><input type="tel" id="pf-phone" disabled></div>
+            </div>
+            <div class="field"><label>Email</label><input type="email" id="pf-email"></div>
+            <div class="field"><label>Delivery Address</label><input type="text" id="pf-address" placeholder="House #, Street, Area"></div>
+            <div class="field"><label>City</label><input type="text" id="pf-city"></div>
+            <p id="profile-status" style="font-size:.85rem; display:none; margin-bottom:12px;"></p>
+            <button type="submit" class="btn btn-primary"><span data-icon="edit" class="icon-sm"></span> Save Changes</button>
+          </form>
+        </div>
+      </div>
+
+      <div class="account-panel" id="tab-orders">
+        <div id="orders-list"><p class="empty-note">Loading your orders...</p></div>
+      </div>
+
+      <div class="account-panel" id="tab-wishlist">
+        <div id="wishlist-list"><p class="empty-note">Loading your wishlist...</p></div>
+      </div>
+
+      <div class="account-panel" id="tab-security">
+        <div class="form-card">
+          <h3><span data-icon="lock" class="icon-md"></span> Change Password</h3>
+          <form id="password-form">
+            <div class="field"><label>Current Password</label><input type="password" id="cp-current" required></div>
+            <div class="field"><label>New Password</label><input type="password" id="cp-new" required minlength="6">
+              <div class="hint">Must be at least 6 characters.</div>
+            </div>
+            <p id="password-status" style="font-size:.85rem; display:none; margin-bottom:12px;"></p>
+            <button type="submit" class="btn btn-dark">Update Password</button>
+          </form>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<footer class="site-footer">
+  <div class="container footer-bottom">
+    <span>© <span class="year"></span> <span class="store-name">Shop360</span>. All rights reserved.</span>
+  </div>
+</footer>
+
+<script src="js/icons.js"></script>
+<script src="js/api.js"></script>
+<script src="js/cart.js"></script>
+<script src="js/auth.js"></script>
+<script src="js/main.js"></script>
+<script>
+/* ---------- guest tab switch ---------- */
+document.querySelectorAll(".auth-tabs button").forEach(btn => {
+  btn.addEventListener("click", () => {
+    document.querySelectorAll(".auth-tabs button").forEach(b=>b.classList.remove("active"));
+    btn.classList.add("active");
+    document.querySelectorAll(".auth-panel").forEach(p=>p.classList.remove("active"));
+    document.getElementById("panel-" + btn.dataset.tab).classList.add("active");
+  });
+});
+
+/* ---------- signup ---------- */
+document.getElementById("signup-form").addEventListener("submit", async (e) => {
+  e.preventDefault();
+  const errEl = document.getElementById("signup-error");
+  errEl.style.display = "none";
+
+  const payload = {
+    name: document.getElementById("su-name").value.trim(),
+    phone: document.getElementById("su-phone").value.trim().replace(/[\s-]/g,""),
+    password: document.getElementById("su-password").value,
+    email: document.getElementById("su-email").value.trim()
+  };
+  if(!/^03\d{9}$/.test(payload.phone)){
+    errEl.textContent = "Enter a valid Pakistani mobile number, e.g. 03001234567"; errEl.style.display="block"; return;
+  }
+  if(payload.password.length < 6){
+    errEl.textContent = "Password must be at least 6 characters."; errEl.style.display="block"; return;
+  }
+
+  const btn = e.target.querySelector('button[type="submit"]');
+  btn.disabled = true; btn.textContent = "Creating account...";
+  const result = await signupUser(payload);
+  btn.disabled = false; btn.textContent = "Create Account";
+
+  if(result && result.success){
+    setSession(result.profile);
+    await afterLogin();
+  }else{
+    errEl.textContent = (result && result.error) || "Something went wrong. Please try again.";
+    errEl.style.display = "block";
+  }
+});
+
+/* ---------- login ---------- */
+document.getElementById("login-form").addEventListener("submit", async (e) => {
+  e.preventDefault();
+  const errEl = document.getElementById("login-error");
+  errEl.style.display = "none";
+
+  const phone = document.getElementById("li-phone").value.trim().replace(/[\s-]/g,"");
+  const password = document.getElementById("li-password").value;
+
+  const btn = e.target.querySelector('button[type="submit"]');
+  btn.disabled = true; btn.textContent = "Logging in...";
+  const result = await loginUser(phone, password);
+  btn.disabled = false; btn.textContent = "Log In";
+
+  if(result && result.success){
+    setSession(result.profile);
+    await afterLogin();
+  }else{
+    errEl.textContent = (result && result.error) || "Something went wrong. Please try again.";
+    errEl.style.display = "block";
+  }
+});
+
+/* ---------- after login: hydrate cart + show dashboard ---------- */
+async function afterLogin(){
+  const session = getSession();
+
+  // merge server cart with local cart (server wins if it has items and local is empty)
+  const serverCart = await pullCartFromServer(session.phone);
+  const localCart = getCart();
+  if(serverCart && serverCart.length && !localCart.length){
+    localStorage.setItem(CART_KEY, JSON.stringify(serverCart));
+    updateCartCount();
+  }else if(localCart.length){
+    pushCartToServer();
+  }
+
+  showMemberView();
+}
+
+function showMemberView(){
+  const session = getSession();
+  document.getElementById("guest-view").style.display = "none";
+  document.getElementById("member-view").style.display = "block";
+  document.getElementById("avatar-initial").textContent = (session.name||"S").charAt(0).toUpperCase();
+  document.getElementById("welcome-name").textContent = "Welcome, " + (session.name || "there");
+  document.getElementById("welcome-phone").textContent = session.phone;
+
+  document.getElementById("pf-name").value = session.name || "";
+  document.getElementById("pf-phone").value = session.phone || "";
+  document.getElementById("pf-email").value = session.email || "";
+  document.getElementById("pf-address").value = session.address || "";
+  document.getElementById("pf-city").value = session.city || "";
+
+  loadOrders();
+  loadWishlist();
+  updateAccountLink();
+}
+
+/* ---------- account dashboard tabs ---------- */
+document.querySelectorAll(".account-tabs button").forEach(btn => {
+  btn.addEventListener("click", () => {
+    document.querySelectorAll(".account-tabs button").forEach(b=>b.classList.remove("active"));
+    btn.classList.add("active");
+    document.querySelectorAll(".account-panel").forEach(p=>p.classList.remove("active"));
+    document.getElementById("tab-" + btn.dataset.panel).classList.add("active");
+  });
+});
+
+/* ---------- profile save ---------- */
+document.getElementById("profile-form").addEventListener("submit", async (e) => {
+  e.preventDefault();
+  const session = getSession();
+  const payload = {
+    phone: session.phone,
+    name: document.getElementById("pf-name").value.trim(),
+    email: document.getElementById("pf-email").value.trim(),
+    address: document.getElementById("pf-address").value.trim(),
+    city: document.getElementById("pf-city").value.trim()
+  };
+  const statusEl = document.getElementById("profile-status");
+  const result = await updateProfileRemote(payload);
+  statusEl.style.display = "block";
+  if(result && result.success){
+    setSession({ ...session, ...payload });
+    statusEl.style.color = "var(--ok)"; statusEl.textContent = "Profile updated.";
+    document.getElementById("welcome-name").textContent = "Welcome, " + (payload.name || "there");
+    document.getElementById("avatar-initial").textContent = (payload.name||"S").charAt(0).toUpperCase();
+  }else{
+    statusEl.style.color = "var(--danger)"; statusEl.textContent = (result && result.error) || "Could not save changes.";
+  }
+});
+
+/* ---------- change password ---------- */
+document.getElementById("password-form").addEventListener("submit", async (e) => {
+  e.preventDefault();
+  const session = getSession();
+  const statusEl = document.getElementById("password-status");
+  const payload = {
+    phone: session.phone,
+    currentPassword: document.getElementById("cp-current").value,
+    newPassword: document.getElementById("cp-new").value
+  };
+  const result = await changePasswordRemote(payload);
+  statusEl.style.display = "block";
+  if(result && result.success){
+    statusEl.style.color = "var(--ok)"; statusEl.textContent = "Password updated.";
+    e.target.reset();
+  }else{
+    statusEl.style.color = "var(--danger)"; statusEl.textContent = (result && result.error) || "Could not update password.";
+  }
+});
+
+/* ---------- orders ---------- */
+async function loadOrders(){
+  const session = getSession();
+  const list = document.getElementById("orders-list");
+  const orders = await fetchOrderHistory(session.phone);
+  if(!orders.length){
+    list.innerHTML = `<p class="empty-note">No orders yet. <a href="shop.html" style="color:var(--accent); font-weight:600;">Start shopping</a>.</p>`;
+    return;
+  }
+  const statusClass = s => s === "Confirmed" || s === "Delivered" ? "status-confirmed" : "status-pending";
+  list.innerHTML = orders.map(o => `
+    <div class="order-row">
+      <div class="top">
+        <span class="oid">${o.orderId}</span>
+        <span class="status-tag ${statusClass(o.status)}">${o.status}</span>
+      </div>
+      <div class="meta">${o.items || ""}</div>
+      <div class="meta">${o.paymentMethod || ""} • ${o.total ? fmtPrice(o.total) : ""}</div>
+    </div>`).join("");
+}
+
+/* ---------- wishlist ---------- */
+async function loadWishlist(){
+  const list = document.getElementById("wishlist-list");
+  const ids = await fetchWishlist();
+  if(!ids.length){
+    list.innerHTML = `<p class="empty-note">No saved items yet. Tap the heart icon on any product to save it here.</p>`;
+    return;
+  }
+  const allProducts = await fetchProducts();
+  const items = ids.map(id => allProducts.find(p => String(p.id) === String(id))).filter(Boolean);
+  if(!items.length){
+    list.innerHTML = `<p class="empty-note">No saved items yet. Tap the heart icon on any product to save it here.</p>`;
+    return;
+  }
+  list.innerHTML = `<div class="wishlist-grid">${items.map(p => {
+    const img = (p.images && p.images[0]) ? p.images[0] : (typeof p.images === "string" ? p.images.split(",")[0] : "");
+    return `
+    <div class="card" style="position:relative;">
+      <button class="wl-remove" data-id="${p.id}">${iconSvg("heart","icon-sm")}</button>
+      <a href="product.html?id=${encodeURIComponent(p.id)}">
+        <div class="thumb"><img src="${img}" alt="${p.name}"></div>
+        <div class="body"><h3>${p.name}</h3><span class="price">${fmtPrice(p.discountPrice||p.price)}</span></div>
+      </a>
+    </div>`;
+  }).join("")}</div>`;
+
+  list.querySelectorAll(".wl-remove").forEach(btn => {
+    btn.addEventListener("click", async () => {
+      await toggleWishlistRemote(btn.dataset.id);
+      loadWishlist();
+    });
+  });
+}
+
+/* ---------- logout ---------- */
+document.getElementById("logout-btn").addEventListener("click", () => {
+  clearSession();
+  location.reload();
+});
+
+/* ---------- init ---------- */
+if(isLoggedIn()) showMemberView();
+</script>
+</body>
+</html>

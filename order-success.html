@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Order Placed — Shop360</title>
+<link rel="icon" type="image/svg+xml" href="assets/favicon.svg">
+<link rel="icon" type="image/png" sizes="32x32" href="assets/favicon-32.png">
+<link rel="apple-touch-icon" href="assets/apple-touch-icon.png">
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+<header class="site-header">
+  <div class="container nav-row">
+    <a href="index.html" class="brand"><span class="mark"><img src="assets/logo-mark.svg" alt="Shop360 logo"></span> <span class="store-name">Shop360</span></a>
+    <nav class="main-nav"><ul><li><a href="index.html">Home</a></li><li><a href="shop.html">Shop</a></li><li><a href="track-order.html">Track Order</a></li></ul></nav>
+    <div class="nav-actions"><a href="profile.html" class="account-link" style="font-weight:600; display:flex; align-items:center; gap:6px;"><span data-icon="user" class="icon-sm"></span> <span class="account-link-label">Account</span></a>
+      <a href="cart.html" class="cart-pill"><span data-icon="cart" class="icon-sm"></span> Cart <span class="count cart-count">0</span></a></div>
+  </div>
+</header>
+<div class="brand-strip"></div>
+
+<section>
+  <div class="container">
+    <div class="order-success" id="success-root">
+      <div class="check"><span data-icon="check"></span></div>
+      <h2>Order placed successfully!</h2>
+      <p>Thanks for shopping with us. We'll contact you shortly to confirm delivery details.</p>
+      <div class="order-id-box" id="order-id">—</div>
+      <div id="cod-note"></div>
+      <div style="display:flex; gap:12px; justify-content:center; margin-top:20px; flex-wrap:wrap;">
+        <a href="#" id="whatsapp-confirm" class="btn btn-primary"><span data-icon="whatsapp" class="icon-sm"></span> Confirm on WhatsApp</a>
+        <a href="shop.html" class="btn btn-ghost">Continue Shopping</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<footer class="site-footer">
+  <div class="container footer-bottom">
+    <span>© <span class="year"></span> <span class="store-name">Shop360</span>. All rights reserved.</span>
+  </div>
+</footer>
+
+<script src="js/icons.js"></script>
+<script src="js/api.js"></script>
+<script src="js/cart.js"></script>
+<script src="js/auth.js"></script>
+<script src="js/main.js"></script>
+<script>
+const last = JSON.parse(localStorage.getItem("lastOrder") || "null");
+if(!last){
+  document.getElementById("success-root").innerHTML = `<h2>No recent order found</h2><p>Looks like you got here directly. <a href="shop.html">Go to shop</a>.</p>`;
+}else{
+  document.getElementById("order-id").textContent = "Order ID: " + (last.orderId || "—");
+  if(last.paymentMethod !== "COD"){
+    document.getElementById("cod-note").innerHTML = `<p>We'll verify your ${last.paymentMethod} payment and confirm shortly.</p>`;
+  }
+  const msg = `Hi! I just placed order ${last.orderId} for ${fmtPrice(last.total)} (${last.paymentMethod}). Please confirm.`;
+  document.getElementById("whatsapp-confirm").href = `https://wa.me/${CONFIG.WHATSAPP_NUMBER}?text=${encodeURIComponent(msg)}`;
+}
+</script>
+</body>
+</html>

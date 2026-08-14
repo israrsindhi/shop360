@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Contact Us — Shop360</title>
+<link rel="icon" type="image/svg+xml" href="assets/favicon.svg">
+<link rel="icon" type="image/png" sizes="32x32" href="assets/favicon-32.png">
+<link rel="apple-touch-icon" href="assets/apple-touch-icon.png">
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+<header class="site-header">
+  <div class="container nav-row">
+    <a href="index.html" class="brand"><span class="mark"><img src="assets/logo-mark.svg" alt="Shop360 logo"></span> <span class="store-name">Shop360</span></a>
+    <nav class="main-nav">
+      <ul>
+        <li><a href="index.html">Home</a></li>
+        <li><a href="shop.html">Shop</a></li>
+        <li><a href="track-order.html">Track Order</a></li>
+        <li><a href="about.html">About</a></li>
+        <li><a href="contact.html" class="active">Contact</a></li>
+      </ul>
+    </nav>
+    <div class="nav-actions">
+      <a href="profile.html" class="account-link" style="font-weight:600; display:flex; align-items:center; gap:6px;"><span data-icon="user" class="icon-sm"></span> <span class="account-link-label">Account</span></a>
+      <a href="cart.html" class="cart-pill"><span data-icon="cart" class="icon-sm"></span> Cart <span class="count cart-count">0</span></a>
+      <button class="menu-toggle" aria-label="Menu"><span data-icon="menu" class="icon-lg"></span></button>
+    </div>
+  </div>
+</header>
+<div class="brand-strip"></div>
+
+<section>
+  <div class="container" style="max-width:760px;">
+    <h1>Get in touch</h1>
+    <div class="form-card">
+      <div class="row-2">
+        <div class="field"><label>Name</label><input type="text" id="c-name" placeholder="Your name"></div>
+        <div class="field"><label>Phone</label><input type="tel" id="c-phone" placeholder="03XXXXXXXXX"></div>
+      </div>
+      <div class="field"><label>Message</label><textarea id="c-message" rows="4" placeholder="How can we help?"></textarea></div>
+      <div style="display:flex; gap:12px; flex-wrap:wrap;">
+        <button class="btn btn-primary" id="contact-submit"><span data-icon="mail" class="icon-sm"></span> Send Message</button>
+        <button class="btn btn-ghost" id="contact-whatsapp"><span data-icon="whatsapp" class="icon-sm"></span> Chat on WhatsApp</button>
+      </div>
+      <p id="contact-status" style="margin-top:14px; font-size:.88rem; display:none;"></p>
+    </div>
+
+    <div style="margin-top:30px; color:var(--ink-soft); line-height:2;">
+      <div><span data-icon="location" class="icon-sm"></span> Sukkur, Sindh, Pakistan</div>
+      <div><span data-icon="whatsapp" class="icon-sm"></span> 0326-7013520</div>
+      <div><span data-icon="mail" class="icon-sm"></span> hello@shop360.pk</div>
+    </div>
+  </div>
+</section>
+
+<section id="returns" class="section-alt">
+  <div class="container" style="max-width:760px;">
+    <h2>Returns &amp; Refunds</h2>
+    <p style="color:var(--ink-soft); line-height:1.8;">
+      Items can be returned within 3 days of delivery if unused and in original packaging.
+      To start a return, message us on WhatsApp with your order ID and reason. Refunds for
+      prepaid (JazzCash/EasyPaisa) orders are sent back to the same account within 3–5 business days.
+      Cash on Delivery orders are refunded via bank transfer or store credit.
+    </p>
+  </div>
+</section>
+
+<footer class="site-footer">
+  <div class="container footer-bottom">
+    <span>© <span class="year"></span> <span class="store-name">Shop360</span>. All rights reserved.</span>
+  </div>
+</footer>
+
+<script src="js/icons.js"></script>
+<script src="js/api.js"></script>
+<script src="js/cart.js"></script>
+<script src="js/auth.js"></script>
+<script src="js/main.js"></script>
+<script>
+function getFields(){
+  return {
+    name: document.getElementById("c-name").value.trim(),
+    phone: document.getElementById("c-phone").value.trim(),
+    message: document.getElementById("c-message").value.trim()
+  };
+}
+
+document.getElementById("contact-submit").addEventListener("click", async () => {
+  const { name, phone, message } = getFields();
+  const status = document.getElementById("contact-status");
+  const btn = document.getElementById("contact-submit");
+
+  if(!name || !message){
+    status.style.display = "block";
+    status.style.color = "var(--danger)";
+    status.textContent = "Please fill in your name and message.";
+    return;
+  }
+
+  btn.disabled = true;
+  const original = btn.innerHTML;
+  btn.innerHTML = "Sending...";
+
+  const result = await submitMessage({ name, phone, message });
+
+  btn.disabled = false;
+  btn.innerHTML = original;
+  status.style.display = "block";
+
+  if(result && result.success){
+    status.style.color = "var(--ok)";
+    status.textContent = "Message sent! We'll get back to you soon.";
+    document.getElementById("c-name").value = "";
+    document.getElementById("c-phone").value = "";
+    document.getElementById("c-message").value = "";
+  }else{
+    status.style.color = "var(--danger)";
+    status.textContent = "Something went wrong. Please try WhatsApp instead.";
+  }
+});
+
+document.getElementById("contact-whatsapp").addEventListener("click", () => {
+  const { name, phone, message } = getFields();
+  const text = `Hi, my name is ${name||"—"} (${phone||"—"}). ${message||""}`;
+  window.open(`https://wa.me/${CONFIG.WHATSAPP_NUMBER}?text=${encodeURIComponent(text)}`, "_blank");
+});
+</script>
+</body>
+</html>

@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title id="page-title">Product — Shop360</title>
+<link rel="icon" type="image/svg+xml" href="assets/favicon.svg">
+<link rel="icon" type="image/png" sizes="32x32" href="assets/favicon-32.png">
+<link rel="apple-touch-icon" href="assets/apple-touch-icon.png">
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+<header class="site-header">
+  <div class="container nav-row">
+    <a href="index.html" class="brand"><span class="mark"><img src="assets/logo-mark.svg" alt="Shop360 logo"></span> <span class="store-name">Shop360</span></a>
+    <nav class="main-nav">
+      <ul>
+        <li><a href="index.html">Home</a></li>
+        <li><a href="shop.html">Shop</a></li>
+        <li><a href="track-order.html">Track Order</a></li>
+        <li><a href="about.html">About</a></li>
+        <li><a href="contact.html">Contact</a></li>
+      </ul>
+    </nav>
+    <div class="nav-actions">
+      <a href="profile.html" class="account-link" style="font-weight:600; display:flex; align-items:center; gap:6px;"><span data-icon="user" class="icon-sm"></span> <span class="account-link-label">Account</span></a>
+      <a href="cart.html" class="cart-pill"><span data-icon="cart" class="icon-sm"></span> Cart <span class="count cart-count">0</span></a>
+      <button class="menu-toggle" aria-label="Menu"><span data-icon="menu" class="icon-lg"></span></button>
+    </div>
+  </div>
+</header>
+<div class="brand-strip"></div>
+
+<section>
+  <div class="container">
+    <div class="breadcrumb"><a href="index.html">Home</a> / <a href="shop.html">Shop</a> / <span id="crumb-name">Product</span></div>
+    <div id="pd-root">
+      <div class="loading-state skeleton" style="height:420px;border-radius:12px;"></div>
+    </div>
+  </div>
+</section>
+
+<a href="#" class="whatsapp-float" aria-label="Chat on WhatsApp"><span data-icon="whatsapp"></span></a>
+
+<footer class="site-footer">
+  <div class="container footer-grid">
+    <div>
+      <div class="footer-brand"><span class="mark"><img src="assets/logo-mark.svg" alt="Shop360 logo"></span> <span class="store-name">Shop360</span></div>
+      <p>Quality everyday products, delivered across Pakistan with Cash on Delivery.</p>
+    </div>
+    <div><h5>Shop</h5><ul><li><a href="shop.html">All Products</a></li></ul></div>
+    <div><h5>Help</h5><ul><li><a href="track-order.html">Track Order</a></li><li><a href="about.html">About Us</a></li><li><a href="contact.html">Contact</a></li></ul></div>
+    <div><h5>Contact</h5><ul><li><span data-icon="location" class="icon-sm"></span> Sukkur, Sindh, Pakistan</li><li><span data-icon="whatsapp" class="icon-sm"></span> 0326-7013520</li></ul></div>
+  </div>
+  <div class="container footer-bottom">
+    <span>© <span class="year"></span> <span class="store-name">Shop360</span>. All rights reserved.</span>
+  </div>
+</footer>
+
+<script src="js/icons.js"></script>
+<script src="js/api.js"></script>
+<script src="js/cart.js"></script>
+<script src="js/auth.js"></script>
+<script src="js/main.js"></script>
+<script>
+let PRODUCT = null;
+let selectedVariant = null;
+let selectedImg = 0;
+
+async function init(){
+  const id = new URLSearchParams(location.search).get("id");
+  const root = document.getElementById("pd-root");
+  if(!id){ root.innerHTML = `<p class="empty-note">No product selected. <a href="shop.html">Go back to shop</a>.</p>`; return; }
+
+  PRODUCT = await fetchProductById(id);
+  if(!PRODUCT){ root.innerHTML = `<p class="empty-note">Product not found. <a href="shop.html">Go back to shop</a>.</p>`; return; }
+
+  document.title = `${PRODUCT.name} — Shop360`;
+  document.getElementById("crumb-name").textContent = PRODUCT.name;
+
+  const images = Array.isArray(PRODUCT.images) ? PRODUCT.images : String(PRODUCT.images||"").split(",").map(s=>s.trim()).filter(Boolean);
+  const variants = String(PRODUCT.variants||"").split(",").map(s=>s.trim()).filter(Boolean);
+  const hasDiscount = PRODUCT.discountPrice && Number(PRODUCT.discountPrice) > 0 && Number(PRODUCT.discountPrice) < Number(PRODUCT.price);
+  const shownPrice = hasDiscount ? PRODUCT.discountPrice : PRODUCT.price;
+  const stock = Number(PRODUCT.stock);
+  selectedVariant = variants[0] || null;
+
+  let stockNote = `<span class="stock-in">${iconSvg("checkCircle","icon-sm")} In stock</span>`;
+  if(stock <= 0) stockNote = `<span class="stock-out">${iconSvg("xCircle","icon-sm")} Out of stock</span>`;
+  else if(stock <= 5) stockNote = `<span class="stock-low">${iconSvg("alertTriangle","icon-sm")} Only ${stock} left</span>`;
+
+  root.innerHTML = `
+  <div class="product-detail">
+    <div class="gallery">
+      <div class="main-img"><img id="main-img" src="${images[0]||''}" alt="${PRODUCT.name}"></div>
+      <div class="thumb-row">
+        ${images.map((img,i)=>`<img src="${img}" class="${i===0?'active':''}" data-i="${i}" alt="thumbnail ${i+1}">`).join("")}
+      </div>
+    </div>
+    <div class="pd-info">
+      <span class="cat">${PRODUCT.category||""}</span>
+      <h1>${PRODUCT.name}</h1>
+      <div class="pd-price">
+        <span class="price">${fmtPrice(shownPrice)}</span>
+        ${hasDiscount ? `<span class="price-strike">${fmtPrice(PRODUCT.price)}</span>` : ""}
+      </div>
+      <div class="stock-note">${stockNote}</div>
+      <p class="pd-desc">${PRODUCT.description||""}</p>
+
+      ${variants.length ? `
+      <div class="variant-group">
+        <strong>Select option:</strong>
+        <div class="opts" id="variant-opts">
+          ${variants.map((v,i)=>`<button type="button" class="variant-opt ${i===0?'selected':''}" data-v="${v}">${v}</button>`).join("")}
+        </div>
+      </div>` : ""}
+
+      <div class="qty-row">
+        <strong>Quantity:</strong>
+        <div class="qty-stepper">
+          <button type="button" id="qty-dec">${iconSvg("minus","icon-sm")}</button>
+          <input type="number" id="qty-input" value="1" min="1" max="${stock>0?stock:99}">
+          <button type="button" id="qty-inc">${iconSvg("plus","icon-sm")}</button>
+        </div>
+      </div>
+
+      <div class="pd-actions">
+        <button class="btn btn-primary" id="add-cart-btn" ${stock<=0?"disabled":""}>${iconSvg("cart","icon-sm")} Add to Cart</button>
+        <button class="btn btn-dark" id="buy-now-btn" ${stock<=0?"disabled":""}>Buy Now</button>
+        <button class="btn btn-ghost" id="wishlist-btn" aria-label="Save to wishlist">${iconSvg("heart","icon-sm")}</button>
+      </div>
+
+      <div class="trust-row">
+        <span class="item">${iconSvg("cash","icon-sm")} Cash on Delivery available</span>
+        <span class="item">${iconSvg("truck","icon-sm")} Delivery in 3–6 days</span>
+        <span class="item">${iconSvg("returnArrow","icon-sm")} 3-day easy return</span>
+      </div>
+    </div>
+  </div>`;
+
+  // gallery click
+  document.querySelectorAll(".thumb-row img").forEach(img => {
+    img.addEventListener("click", () => {
+      document.getElementById("main-img").src = img.src;
+      document.querySelectorAll(".thumb-row img").forEach(i=>i.classList.remove("active"));
+      img.classList.add("active");
+    });
+  });
+
+  // variant select
+  document.querySelectorAll(".variant-opt").forEach(btn => {
+    btn.addEventListener("click", () => {
+      document.querySelectorAll(".variant-opt").forEach(b=>b.classList.remove("selected"));
+      btn.classList.add("selected");
+      selectedVariant = btn.dataset.v;
+    });
+  });
+
+  // qty stepper
+  const qtyInput = document.getElementById("qty-input");
+  document.getElementById("qty-dec").addEventListener("click", () => qtyInput.value = Math.max(1, Number(qtyInput.value)-1));
+  document.getElementById("qty-inc").addEventListener("click", () => qtyInput.value = Number(qtyInput.value)+1);
+
+  function buildLine(){
+    return {
+      id: PRODUCT.id, name: PRODUCT.name, image: images[0]||"",
+      price: Number(shownPrice), variant: selectedVariant, qty: Number(qtyInput.value)
+    };
+  }
+
+  document.getElementById("add-cart-btn").addEventListener("click", () => addToCart(buildLine()));
+  document.getElementById("buy-now-btn").addEventListener("click", () => {
+    addToCart(buildLine());
+    location.href = "cart.html";
+  });
+
+  const wlBtn = document.getElementById("wishlist-btn");
+  if(isLoggedIn()){
+    fetchWishlist().then(ids => {
+      if(ids.map(String).includes(String(PRODUCT.id))) wlBtn.classList.add("btn-primary");
+    });
+  }
+  wlBtn.addEventListener("click", async () => {
+    if(!isLoggedIn()){
+      location.href = "profile.html";
+      return;
+    }
+    const result = await toggleWishlistRemote(PRODUCT.id);
+    if(result && result.success){
+      wlBtn.classList.toggle("btn-primary", result.added);
+      showToast(result.added ? "Saved to wishlist" : "Removed from wishlist");
+    }
+  });
+}
+init();
+</script>
+</body>
+</html>

@@ -1,0 +1,191 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Checkout — Shop360</title>
+<link rel="icon" type="image/svg+xml" href="assets/favicon.svg">
+<link rel="icon" type="image/png" sizes="32x32" href="assets/favicon-32.png">
+<link rel="apple-touch-icon" href="assets/apple-touch-icon.png">
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+<header class="site-header">
+  <div class="container nav-row">
+    <a href="index.html" class="brand"><span class="mark"><img src="assets/logo-mark.svg" alt="Shop360 logo"></span> <span class="store-name">Shop360</span></a>
+    <nav class="main-nav">
+      <ul>
+        <li><a href="index.html">Home</a></li>
+        <li><a href="shop.html">Shop</a></li>
+        <li><a href="about.html">About</a></li>
+        <li><a href="contact.html">Contact</a></li>
+      </ul>
+    </nav>
+    <div class="nav-actions">
+      <a href="profile.html" class="account-link" style="font-weight:600; display:flex; align-items:center; gap:6px;"><span data-icon="user" class="icon-sm"></span> <span class="account-link-label">Account</span></a>
+      <a href="cart.html" class="cart-pill"><span data-icon="cart" class="icon-sm"></span> Cart <span class="count cart-count">0</span></a>
+      <button class="menu-toggle" aria-label="Menu"><span data-icon="menu" class="icon-lg"></span></button>
+    </div>
+  </div>
+</header>
+<div class="brand-strip"></div>
+
+<section>
+  <div class="container">
+    <div class="breadcrumb"><a href="index.html">Home</a> / <a href="cart.html">Cart</a> / Checkout</div>
+    <h2>Checkout</h2>
+    <div id="checkout-root"></div>
+  </div>
+</section>
+
+<footer class="site-footer">
+  <div class="container footer-bottom">
+    <span>© <span class="year"></span> <span class="store-name">Shop360</span>. All rights reserved.</span>
+  </div>
+</footer>
+
+<script src="js/icons.js"></script>
+<script src="js/api.js"></script>
+<script src="js/cart.js"></script>
+<script src="js/auth.js"></script>
+<script src="js/main.js"></script>
+<script>
+const PK_CITIES = ["Karachi","Lahore","Islamabad","Sukkur","Hyderabad","Rawalpindi","Faisalabad","Multan","Peshawar","Quetta","Larkana","Nawabshah","Khairpur","Other"];
+
+function render(){
+  const cart = getCart();
+  const root = document.getElementById("checkout-root");
+  if(!cart.length){
+    root.innerHTML = `<div class="empty-state"><span class="icon-wrap">${iconSvg("cart","icon-lg")}</span><h3>Your cart is empty</h3><a href="shop.html" class="btn btn-primary" style="margin-top:14px;">Go Shopping</a></div>`;
+    return;
+  }
+
+  const subtotal = cartSubtotal();
+  const shipping = subtotal >= CONFIG.FREE_SHIPPING_OVER ? 0 : CONFIG.SHIPPING_FLAT;
+  const total = subtotal + shipping;
+
+  const session = (typeof getSession === "function") ? getSession() : null;
+
+  root.innerHTML = `
+  ${!session ? `<div class="form-card" style="margin-bottom:20px; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px;">
+    <span>${iconSvg("user","icon-sm")} Have an account? <a href="profile.html" style="color:var(--accent); font-weight:700;">Log in</a> for faster checkout next time.</span>
+  </div>` : ""}
+  <div class="checkout-layout">
+    <form id="checkout-form">
+      <div class="form-card">
+        <h3>${iconSvg("location","icon-md")} Delivery Address</h3>
+        <div class="row-2">
+          <div class="field"><label>Full Name *</label><input type="text" name="fullName" value="${session ? session.name||'' : ''}" required></div>
+          <div class="field"><label>Phone Number *</label><input type="tel" name="phone" value="${session ? session.phone||'' : ''}" placeholder="03XXXXXXXXX" required>
+            <div class="hint">We'll call/WhatsApp this number to confirm your order.</div>
+          </div>
+        </div>
+        <div class="field"><label>House / Street Address *</label><input type="text" name="street" value="${session ? session.address||'' : ''}" placeholder="House #, Street, Area" required></div>
+        <div class="row-2">
+          <div class="field"><label>City *</label>
+            <select name="city" required>
+              <option value="">Select city</option>
+              ${PK_CITIES.map(c=>`<option value="${c}" ${session && session.city===c ? "selected" : ""}>${c}</option>`).join("")}
+            </select>
+          </div>
+          <div class="field"><label>Postal Code</label><input type="text" name="postal" placeholder="Optional"></div>
+        </div>
+        <div class="field"><label>Order Notes</label><textarea name="notes" rows="2" placeholder="Any delivery instructions (optional)"></textarea></div>
+      </div>
+
+      <div class="form-card" style="margin-top:20px;">
+        <h3>${iconSvg("phoneMoney","icon-md")} Payment Method</h3>
+        <div class="pay-options">
+          <label class="pay-option selected" data-method="COD">
+            <div class="top"><input type="radio" name="payment" value="COD" checked> ${iconSvg("cash","icon-sm")} Cash on Delivery</div>
+            <div class="details">Pay in cash when your order is delivered to your doorstep.</div>
+          </label>
+          <label class="pay-option" data-method="JazzCash">
+            <div class="top"><input type="radio" name="payment" value="JazzCash"> ${iconSvg("phoneMoney","icon-sm")} JazzCash</div>
+            <div class="details">Send payment to the account below, then enter your Transaction ID.
+              <div class="acct">JazzCash: 0322-4010285 (Bisharatullah)</div>
+              <div class="field" style="margin-top:10px;"><input type="text" name="jazzTxn" placeholder="Transaction ID"></div>
+            </div>
+          </label>
+          <label class="pay-option" data-method="UPaisa">
+            <div class="top"><input type="radio" name="payment" value="EasyPaisa"> ${iconSvg("phoneMoney","icon-sm")} EasyPaisa</div>
+            <div class="details">Send payment to the account below, then enter your Transaction ID.
+              <div class="acct">UPaisa: 0326-7013520 (Manthar Ali Mallah)</div>
+              <div class="field" style="margin-top:10px;"><input type="text" name="easyTxn" placeholder="Transaction ID"></div>
+            </div>
+          </label>
+        </div>
+      </div>
+
+      <button type="submit" class="btn btn-primary btn-block" style="margin-top:20px;">Place Order — ${fmtPrice(total)}</button>
+    </form>
+
+    <div class="summary-box">
+      <h3>Order Summary</h3>
+      ${cart.map(i=>`<div class="summary-row"><span>${i.name} ${i.variant?`(${i.variant})`:""} × ${i.qty}</span><span>${fmtPrice(i.price*i.qty)}</span></div>`).join("")}
+      <div class="summary-row"><span>Subtotal</span><span>${fmtPrice(subtotal)}</span></div>
+      <div class="summary-row"><span>Shipping</span><span>${shipping===0?"FREE":fmtPrice(shipping)}</span></div>
+      <div class="summary-row total"><span>Total</span><span>${fmtPrice(total)}</span></div>
+    </div>
+  </div>`;
+
+  // payment method toggle
+  document.querySelectorAll(".pay-option").forEach(opt => {
+    opt.addEventListener("click", () => {
+      document.querySelectorAll(".pay-option").forEach(o=>o.classList.remove("selected"));
+      opt.classList.add("selected");
+      opt.querySelector('input[type="radio"]').checked = true;
+    });
+  });
+
+  document.getElementById("checkout-form").addEventListener("submit", handleSubmit);
+}
+
+async function handleSubmit(e){
+  e.preventDefault();
+  const form = e.target;
+  const data = Object.fromEntries(new FormData(form).entries());
+
+  // basic PK phone validation: 03XXXXXXXXX (11 digits)
+  const phoneOk = /^03\d{9}$/.test(data.phone.replace(/[\s-]/g,""));
+  if(!phoneOk){
+    alert("Please enter a valid Pakistani mobile number, e.g. 03001234567");
+    return;
+  }
+  if(!data.city){ alert("Please select your city."); return; }
+
+  const cart = getCart();
+  const subtotal = cartSubtotal();
+  const shipping = subtotal >= CONFIG.FREE_SHIPPING_OVER ? 0 : CONFIG.SHIPPING_FLAT;
+  const total = subtotal + shipping;
+
+  const submitBtn = form.querySelector('button[type="submit"]');
+  submitBtn.disabled = true; submitBtn.textContent = "Placing order...";
+
+  const order = {
+    fullName: data.fullName, phone: data.phone.replace(/[\s-]/g,""),
+    street: data.street, city: data.city, postal: data.postal || "",
+    notes: data.notes || "", paymentMethod: data.payment,
+    txnId: data.payment === "JazzCash" ? (data.jazzTxn||"") : data.payment === "EasyPaisa" ? (data.easyTxn||"") : "",
+    items: cart.map(i => `${i.name}${i.variant?` (${i.variant})`:""} x${i.qty}`).join("; "),
+    itemsJson: JSON.stringify(cart),
+    subtotal, shipping, total,
+    status: "Pending", createdAt: new Date().toISOString()
+  };
+
+  const result = await submitOrder(order);
+  submitBtn.disabled = false; submitBtn.textContent = `Place Order — ${fmtPrice(total)}`;
+
+  if(result && (result.success || result.orderId)){
+    localStorage.setItem("lastOrder", JSON.stringify({...order, orderId: result.orderId}));
+    clearCart();
+    location.href = "order-success.html";
+  }else{
+    alert("Something went wrong placing your order. Please try again, or message us on WhatsApp.");
+  }
+}
+render();
+</script>
+</body>
+</html>

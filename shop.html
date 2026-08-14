@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Shop All Products — Shop360</title>
+<link rel="icon" type="image/svg+xml" href="assets/favicon.svg">
+<link rel="icon" type="image/png" sizes="32x32" href="assets/favicon-32.png">
+<link rel="apple-touch-icon" href="assets/apple-touch-icon.png">
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+<header class="site-header">
+  <div class="container nav-row">
+    <a href="index.html" class="brand"><span class="mark"><img src="assets/logo-mark.svg" alt="Shop360 logo"></span> <span class="store-name">Shop360</span></a>
+    <nav class="main-nav">
+      <ul>
+        <li><a href="index.html">Home</a></li>
+        <li><a href="shop.html" class="active">Shop</a></li>
+        <li><a href="track-order.html">Track Order</a></li>
+        <li><a href="about.html">About</a></li>
+        <li><a href="contact.html">Contact</a></li>
+      </ul>
+    </nav>
+    <div class="nav-actions">
+      <a href="profile.html" class="account-link" style="font-weight:600; display:flex; align-items:center; gap:6px;"><span data-icon="user" class="icon-sm"></span> <span class="account-link-label">Account</span></a>
+      <a href="cart.html" class="cart-pill"><span data-icon="cart" class="icon-sm"></span> Cart <span class="count cart-count">0</span></a>
+      <button class="menu-toggle" aria-label="Menu"><span data-icon="menu" class="icon-lg"></span></button>
+    </div>
+  </div>
+</header>
+<div class="brand-strip"></div>
+
+<section>
+  <div class="container">
+    <div class="breadcrumb"><a href="index.html">Home</a> / Shop</div>
+    <div class="section-head">
+      <div><h2>All Products</h2><p id="result-count">Loading...</p></div>
+      <form class="search-box" id="search-form" style="max-width:320px;">
+        <input type="text" id="search-input" placeholder="Search products...">
+        <button type="submit"><span data-icon="search" class="icon-sm"></span> Search</button>
+      </form>
+    </div>
+
+    <div class="shop-layout">
+      <aside class="filters">
+        <h4>Category</h4>
+        <div class="group" id="cat-filters"></div>
+        <h4>Price</h4>
+        <div class="group">
+          <label><input type="radio" name="price" value="all" checked> All prices</label>
+          <label><input type="radio" name="price" value="0-1000"> Under Rs 1,000</label>
+          <label><input type="radio" name="price" value="1000-2500"> Rs 1,000 – 2,500</label>
+          <label><input type="radio" name="price" value="2500-99999"> Above Rs 2,500</label>
+        </div>
+        <h4>Availability</h4>
+        <div class="group">
+          <label><input type="checkbox" id="in-stock-only"> In stock only</label>
+        </div>
+      </aside>
+
+      <div>
+        <div class="product-grid" id="product-grid">
+          <div class="loading-state skeleton" style="height:280px;border-radius:12px;"></div>
+          <div class="loading-state skeleton" style="height:280px;border-radius:12px;"></div>
+          <div class="loading-state skeleton" style="height:280px;border-radius:12px;"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<a href="#" class="whatsapp-float" aria-label="Chat on WhatsApp"><span data-icon="whatsapp"></span></a>
+
+<footer class="site-footer">
+  <div class="container footer-grid">
+    <div>
+      <div class="footer-brand"><span class="mark"><img src="assets/logo-mark.svg" alt="Shop360 logo"></span> <span class="store-name">Shop360</span></div>
+      <p>Quality everyday products, delivered across Pakistan with Cash on Delivery.</p>
+    </div>
+    <div><h5>Shop</h5><ul><li><a href="shop.html">All Products</a></li></ul></div>
+    <div><h5>Help</h5><ul><li><a href="track-order.html">Track Order</a></li><li><a href="about.html">About Us</a></li><li><a href="contact.html">Contact</a></li></ul></div>
+    <div><h5>Contact</h5><ul><li><span data-icon="location" class="icon-sm"></span> Sukkur, Sindh, Pakistan</li><li><span data-icon="whatsapp" class="icon-sm"></span> 0326-7013520</li></ul></div>
+  </div>
+  <div class="container footer-bottom">
+    <span>© <span class="year"></span> <span class="store-name">Shop360</span>. All rights reserved.</span>
+  </div>
+</footer>
+
+<script src="js/icons.js"></script>
+<script src="js/api.js"></script>
+<script src="js/cart.js"></script>
+<script src="js/auth.js"></script>
+<script src="js/main.js"></script>
+<script>
+let ALL_PRODUCTS = [];
+let state = { cat: new URLSearchParams(location.search).get("cat") || "all", price: "all", q: "", inStockOnly:false };
+
+function renderCard(p){
+  const img = (p.images && p.images[0]) ? p.images[0] : (typeof p.images === "string" ? p.images.split(",")[0] : "");
+  const hasDiscount = p.discountPrice && Number(p.discountPrice) > 0 && Number(p.discountPrice) < Number(p.price);
+  const shownPrice = hasDiscount ? p.discountPrice : p.price;
+  const outOfStock = Number(p.stock) <= 0;
+  return `
+  <div class="card" style="position:relative;">
+    <button class="wl-heart" data-id="${p.id}" aria-label="Save to wishlist">${iconSvg("heart","icon-sm")}</button>
+    <a href="product.html?id=${encodeURIComponent(p.id)}" style="display:contents;">
+      <div class="thumb">
+        <img src="${img}" alt="${p.name}" loading="lazy">
+        ${outOfStock ? `<span class="badge badge-out">Out of stock</span>` : hasDiscount ? `<span class="badge">Sale</span>` : ""}
+      </div>
+      <div class="body">
+        <span class="cat">${p.category || ""}</span>
+        <h3>${p.name}</h3>
+        <div class="price-row">
+          <span class="price">${fmtPrice(shownPrice)}</span>
+          ${hasDiscount ? `<span class="price-strike">${fmtPrice(p.price)}</span>` : ""}
+        </div>
+      </div>
+    </a>
+  </div>`;
+}
+
+async function hydrateWishlistHearts(){
+  if(!isLoggedIn()) return;
+  const ids = (await fetchWishlist()).map(String);
+  document.querySelectorAll(".wl-heart").forEach(btn => {
+    if(ids.includes(String(btn.dataset.id))) btn.classList.add("active");
+  });
+}
+
+document.getElementById("product-grid").addEventListener("click", async (e) => {
+  const btn = e.target.closest(".wl-heart");
+  if(!btn) return;
+  e.preventDefault(); e.stopPropagation();
+  if(!isLoggedIn()){ location.href = "profile.html"; return; }
+  const result = await toggleWishlistRemote(btn.dataset.id);
+  if(result && result.success){
+    btn.classList.toggle("active", result.added);
+    showToast(result.added ? "Saved to wishlist" : "Removed from wishlist");
+  }
+});
+
+function applyFilters(){
+  let list = [...ALL_PRODUCTS];
+  if(state.cat !== "all") list = list.filter(p => p.category === state.cat);
+  if(state.q) list = list.filter(p => p.name.toLowerCase().includes(state.q.toLowerCase()));
+  if(state.price !== "all"){
+    const [min,max] = state.price.split("-").map(Number);
+    list = list.filter(p => {
+      const price = (p.discountPrice && Number(p.discountPrice) > 0) ? p.discountPrice : p.price;
+      return price >= min && price <= max;
+    });
+  }
+  if(state.inStockOnly) list = list.filter(p => Number(p.stock) > 0);
+
+  const grid = document.getElementById("product-grid");
+  document.getElementById("result-count").textContent = `${list.length} product${list.length!==1?"s":""} found`;
+  grid.innerHTML = list.length ? list.map(renderCard).join("") : `<p class="empty-note">No products match your filters.</p>`;
+  hydrateWishlistHearts();
+}
+
+function renderCategoryFilters(){
+  const cats = [...new Set(ALL_PRODUCTS.map(p => p.category).filter(Boolean))];
+  const box = document.getElementById("cat-filters");
+  box.innerHTML = `<label><input type="radio" name="cat" value="all" ${state.cat==="all"?"checked":""}> All</label>` +
+    cats.map(c => `<label><input type="radio" name="cat" value="${c}" ${state.cat===c?"checked":""}> ${c}</label>`).join("");
+  box.addEventListener("change", e => { state.cat = e.target.value; applyFilters(); });
+}
+
+async function init(){
+  ALL_PRODUCTS = await fetchProducts();
+  renderCategoryFilters();
+  applyFilters();
+
+  document.getElementById("search-form").addEventListener("submit", e => {
+    e.preventDefault();
+    state.q = document.getElementById("search-input").value.trim();
+    applyFilters();
+  });
+  document.querySelectorAll('input[name="price"]').forEach(r => r.addEventListener("change", e => {
+    state.price = e.target.value; applyFilters();
+  }));
+  document.getElementById("in-stock-only").addEventListener("change", e => {
+    state.inStockOnly = e.target.checked; applyFilters();
+  });
+}
+init();
+</script>
+</body>
+</html>

@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Shop360 — Everyday Shopping, Delivered Across Pakistan</title>
+<meta name="description" content="Shop clothing, accessories & more with Cash on Delivery, JazzCash and EasyPaisa across Pakistan.">
+<meta property="og:title" content="Shop360">
+<meta property="og:description" content="Everyday shopping, delivered across Pakistan.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="icon" type="image/svg+xml" href="assets/favicon.svg">
+<link rel="icon" type="image/png" sizes="32x32" href="assets/favicon-32.png">
+<link rel="icon" type="image/png" sizes="16x16" href="assets/favicon-16.png">
+<link rel="apple-touch-icon" href="assets/apple-touch-icon.png">
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+<div class="topbar">
+  <div class="container">
+    <span data-icon="truck" class="icon-sm"></span>
+    <span>Free delivery on orders over Rs 3,000 &nbsp;|&nbsp; <span data-icon="phone" class="icon-sm"></span> 0326-7013520</span>
+    <span><a href="track-order.html">Track your order</a></span>
+  </div>
+</div>
+
+<header class="site-header">
+  <div class="container nav-row">
+    <a href="index.html" class="brand"><span class="mark"><img src="assets/logo-mark.svg" alt="Shop360 logo"></span> <span class="store-name">Shop360</span></a>
+    <nav class="main-nav">
+      <ul>
+        <li><a href="index.html" class="active">Home</a></li>
+        <li><a href="shop.html">Shop</a></li>
+        <li><a href="track-order.html">Track Order</a></li>
+        <li><a href="about.html">About</a></li>
+        <li><a href="contact.html">Contact</a></li>
+      </ul>
+    </nav>
+    <div class="nav-actions">
+      <a href="profile.html" class="account-link" style="font-weight:600; display:flex; align-items:center; gap:6px;"><span data-icon="user" class="icon-sm"></span> <span class="account-link-label">Account</span></a>
+      <a href="cart.html" class="cart-pill"><span data-icon="cart" class="icon-sm"></span> Cart <span class="count cart-count">0</span></a>
+      <button class="menu-toggle" aria-label="Menu"><span data-icon="menu" class="icon-lg"></span></button>
+    </div>
+  </div>
+</header>
+<div class="brand-strip"></div>
+
+<section class="hero">
+  <div class="container">
+    <div class="hero-copy">
+      <span class="eyebrow"><span data-icon="package" class="icon-sm"></span> Delivered nationwide</span>
+      <h1>Everyday shopping, straight from home to your doorstep.</h1>
+      <p class="lead">Fashion, accessories & essentials — with Cash on Delivery, JazzCash, EasyPaisa and WhatsApp ordering built for how Pakistan actually shops online.</p>
+      <div class="hero-actions">
+        <a href="shop.html" class="btn btn-primary">Shop Now</a>
+        <a href="#categories" class="btn btn-outline">Browse Categories</a>
+      </div>
+    </div>
+    <div class="hero-visual">
+      <img src="https://images.unsplash.com/photo-1445205170230-053b83016050?w=900" alt="Shop360 featured product">
+    </div>
+  </div>
+</section>
+
+<section id="categories">
+  <div class="container">
+    <div class="section-head">
+      <div><h2>Shop by category</h2><p>Find what you need, faster.</p></div>
+    </div>
+    <div class="categories-row">
+      <a href="shop.html?cat=Men" class="category-card"><span class="icon-wrap" data-icon="user"></span>Men</a>
+      <a href="shop.html?cat=Women" class="category-card"><span class="icon-wrap" data-icon="user"></span>Women</a>
+      <a href="shop.html?cat=Kids" class="category-card"><span class="icon-wrap" data-icon="star"></span>Kids</a>
+      <a href="shop.html?cat=Footwear" class="category-card"><span class="icon-wrap" data-icon="package"></span>Footwear</a>
+      <a href="shop.html?cat=Accessories" class="category-card"><span class="icon-wrap" data-icon="shield"></span>Accessories</a>
+      <a href="shop.html?cat=Shawls" class="category-card"><span class="icon-wrap" data-icon="package"></span>Shawls</a>
+    </div>
+  </div>
+</section>
+
+<section class="section-alt">
+  <div class="container">
+    <div class="section-head">
+      <div><h2>Featured products</h2><p>Popular picks this week.</p></div>
+      <a href="shop.html" class="btn btn-ghost btn-sm">View all <span data-icon="arrowRight" class="icon-sm"></span></a>
+    </div>
+    <div class="product-grid" id="featured-grid">
+      <div class="loading-state skeleton" style="height:280px;border-radius:12px;"></div>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="container">
+    <div class="section-head">
+      <div><h2>Why shop with us</h2></div>
+    </div>
+    <div class="categories-row">
+      <div class="category-card"><span class="icon-wrap" data-icon="cash"></span>Cash on Delivery</div>
+      <div class="category-card"><span class="icon-wrap" data-icon="phoneMoney"></span>JazzCash &amp; EasyPaisa</div>
+      <div class="category-card"><span class="icon-wrap" data-icon="truck"></span>Nationwide Delivery</div>
+      <div class="category-card"><span class="icon-wrap" data-icon="returnArrow"></span>Easy Returns</div>
+    </div>
+  </div>
+</section>
+
+<a href="#" class="whatsapp-float" aria-label="Chat on WhatsApp"><span data-icon="whatsapp"></span></a>
+
+<footer class="site-footer">
+  <div class="container footer-grid">
+    <div>
+      <div class="footer-brand"><span class="mark"><img src="assets/logo-mark.svg" alt="Shop360 logo"></span> <span class="store-name">Shop360</span></div>
+      <p>Quality everyday products, delivered across Pakistan with Cash on Delivery.</p>
+      <div class="footer-social">
+        <a href="#" aria-label="Facebook"><span data-icon="facebook" class="icon-md"></span></a>
+        <a href="#" aria-label="Instagram"><span data-icon="instagram" class="icon-md"></span></a>
+        <a href="https://wa.me/923267013520" aria-label="WhatsApp"><span data-icon="whatsapp" class="icon-md"></span></a>
+      </div>
+    </div>
+    <div>
+      <h5>Shop</h5>
+      <ul>
+        <li><a href="shop.html">All Products</a></li>
+        <li><a href="shop.html?cat=Women">Women</a></li>
+        <li><a href="shop.html?cat=Men">Men</a></li>
+      </ul>
+    </div>
+    <div>
+      <h5>Help</h5>
+      <ul>
+        <li><a href="track-order.html">Track Order</a></li>
+        <li><a href="about.html">About Us</a></li>
+        <li><a href="contact.html">Contact</a></li>
+        <li><a href="contact.html#returns">Returns &amp; Refunds</a></li>
+      </ul>
+    </div>
+    <div>
+      <h5>Contact</h5>
+      <ul>
+        <li><span data-icon="location" class="icon-sm"></span> Sukkur, Sindh, Pakistan</li>
+        <li><span data-icon="whatsapp" class="icon-sm"></span> 0326-7013520</li>
+        <li><span data-icon="mail" class="icon-sm"></span> hello@shop360.pk</li>
+      </ul>
+    </div>
+  </div>
+  <div class="container footer-bottom">
+    <span>© <span class="year"></span> <span class="store-name">Shop360</span>. All rights reserved.</span>
+    <span>Built with HTML, CSS &amp; JS — powered by Google Sheets</span>
+  </div>
+</footer>
+
+<script src="js/icons.js"></script>
+<script src="js/api.js"></script>
+<script src="js/cart.js"></script>
+<script src="js/auth.js"></script>
+<script src="js/main.js"></script>
+<script>
+async function loadFeatured(){
+  const grid = document.getElementById("featured-grid");
+  const products = (await fetchProducts()).slice(0, 4);
+  if(!products.length){ grid.innerHTML = `<p class="empty-note">No products yet — add some to your Google Sheet.</p>`; return; }
+  grid.innerHTML = products.map(renderCard).join("");
+}
+function renderCard(p){
+  const img = (p.images && p.images[0]) ? p.images[0] : (typeof p.images === "string" ? p.images.split(",")[0] : "");
+  const hasDiscount = p.discountPrice && Number(p.discountPrice) > 0 && Number(p.discountPrice) < Number(p.price);
+  const shownPrice = hasDiscount ? p.discountPrice : p.price;
+  const outOfStock = Number(p.stock) <= 0;
+  return `
+  <a href="product.html?id=${encodeURIComponent(p.id)}" class="card">
+    <div class="thumb">
+      <img src="${img}" alt="${p.name}" loading="lazy">
+      ${outOfStock ? `<span class="badge badge-out">Out of stock</span>` : hasDiscount ? `<span class="badge">Sale</span>` : ""}
+    </div>
+    <div class="body">
+      <span class="cat">${p.category || ""}</span>
+      <h3>${p.name}</h3>
+      <div class="price-row">
+        <span class="price">${fmtPrice(shownPrice)}</span>
+        ${hasDiscount ? `<span class="price-strike">${fmtPrice(p.price)}</span>` : ""}
+      </div>
+    </div>
+  </a>`;
+}
+loadFeatured();
+</script>
+</body>
+</html>
